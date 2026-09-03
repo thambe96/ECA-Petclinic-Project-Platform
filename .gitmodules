@@ -1,0 +1,9 @@
+[submodule "api-gateway"]
+	path = api-gateway
+	url = https://github.com/thambe96/ECA-Petclinic-Project-Platform-Api-Gateway.git
+[submodule "config-server"]
+	path = config-server
+	url = https://github.com/thambe96/ECA-Petclinic-Project-Platform-Config-Server.git
+[submodule "service-registry"]
+	path = service-registry
+	url = https://github.com/thambe96/ECA-Petclinic-Project-Platform-Service-Registry.git
