@@ -1,251 +1,131 @@
-#### Student Name: Oshadha Sankalpa Thambavita
-#### Student Number: 241711043
-#### Slack Handle: Oshadha Thambavita
-#### GCP Project ID: project-84bf5412-62ae-4b65-919
+# Pet Clinic Infrastructure Platform
 
-# Capstone Project — Platform Components
+## 👤 Student & Project Metadata
 
-This repository manages the **platform components** of the Capstone Project. It serves as the parent repository for the infrastructure-level services required to support and connect the project's microservices.
+- **Student Name**: Oshadha Sankalpa Thambavita
+- **Student Number**: 241711043
+- **Slack Handle**: Oshadha Thambavita
+- **GCP ID**: eca-petclinic-241711043
 
-The platform consists of the following independently managed repositories:
-
-* **API Gateway** — Provides a single entry point for client requests and routes traffic to the appropriate microservices.
-* **Config Server** — Centralizes and provides configuration properties to the microservices.
-* **Service Registry** — Maintains information about the microservices registered within the platform network and enables service discovery.
-
-Each of these components is maintained in its own Git repository and included in this repository as a **Git submodule**.
+This repository contains the core platform services for the **Pet Clinic Microservices Architecture**. Built with **Spring Boot 3.4.3**, **Java 23**, and **Spring Cloud 2024.0.0**, this module provides centralized configuration management, service registration/discovery, and API routing for the application.
 
 ---
 
+## 🏛 Platform Architecture Overview
 
-## Repository Structure
+```text
+                     ┌──────────────────┐
+                     │   React Client   │
+                     └────────┬─────────┘
+                              │ HTTP (Port 8080)
+                              ▼
+                    ┌───────────────────┐
+                    │    API Gateway    │ (Spring Cloud Gateway)
+                    └─────────┬─────────┘
+                              │ Dynamic Route Resolution
+            ┌─────────────────┼─────────────────┐
+            ▼                 ▼                 ▼
+   ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
+   │ Doctor Service │ │  Pet Service   │ │Appointment Svc │
+   └───────┬────────┘ └───────┬────────┘ └───────┬────────┘
+           │                  │                  │
+           └──────────────────┼──────────────────┘
+                              │ Registration & Heartbeats
+                              ▼
+                    ┌───────────────────┐
+                    │ Service Registry  │ (Eureka Server)
+                    └───────────────────┘
+                              ▲
+                              │ Configuration Sync
+                    ┌───────────────────┐
+                    │   Config Server   │ (Spring Cloud Config)
+                    └───────────────────┘
+```
 
-The platform components are included as Git submodules:
+---
+
+## 🧩 Core Platform Components
+
+| Component | Tech | Default Port | Description |
+| :--- | :--- | :--- | :--- |
+| ⚙ **`config-server`** | Spring Cloud Config Server | `8888` | Provides centralized external configuration properties to all microservices and infrastructure components. |
+| 🔍 **`service-registry`** | Spring Cloud Netflix Eureka Server | `8761` | Dynamic service discovery server. All domain microservices register here to enable load balancing and routing. |
+| 🌐 **`api-gateway`** | Spring Cloud Gateway | `8080` (or `80`) | Single entry point for frontend and client requests. Routes incoming `/api/**` traffic to downstream services registered with Eureka. |
+
+---
+
+## 🛠 Tech Stack & Dependencies
+
+- **Language & JDK**: Java 23
+- **Framework**: Spring Boot `3.4.3`
+- **Spring Cloud Version**: `2024.0.0`
+- **Infrastructure Modules**:
+  - `spring-cloud-config-server`
+  - `spring-cloud-starter-netflix-eureka-server`
+  - `spring-cloud-starter-gateway`
+
+---
+
+## 📁 Directory Structure
 
 ```text
 platform/
-├── api-gateway/
-├── config-server/
-├── service-registry/
-├── pom.xml
-├── ecosystem.config.js
-└── README.md
-
+├── pom.xml                     # Parent Maven POM aggregating all platform modules
+├── ecosystem.config.js         # PM2 configuration script for orchestration
+├── config-server/              # Centralized configuration server
+├── service-registry/           # Netflix Eureka discovery server
+└── api-gateway/                # Spring Cloud API Gateway
 ```
 
-Each directory represents a separate Git repository managed independently from this parent repository.
-
-### Git Submodules
-
-The repositories are added as submodules so that each platform component can be:
-
-* Developed and versioned independently.
-* Maintained in its own repository.
-* Updated without duplicating source code.
-* Pulled together through the parent platform repository.
-* Easily deployed as part of the overall platform infrastructure.
-
-The parent repository tracks the specific commit of each submodule, ensuring that a deployment can use known versions of each platform component.
-
 ---
 
-## Platform Components
+## 🚀 Building & Startup Order
 
-### API Gateway
+### Prerequisites
+- **JDK 23** installed and configured in `JAVA_HOME`.
+- **Apache Maven 3.8+**.
 
-The **API Gateway** acts as the entry point for requests coming from clients.
-
-Its primary responsibilities include:
-
-* Receiving client requests.
-* Routing requests to the appropriate microservices.
-* Providing a centralized entry point to the backend services.
-* Integrating with the service discovery mechanism.
-* Supporting scalable deployments through a configured load balancer.
-
-Multiple API Gateway instances can be deployed behind a load balancer to distribute incoming traffic across available instances.
-
----
-
-### Config Server
-
-The **Config Server** provides centralized configuration management for the microservices.
-
-Instead of maintaining configuration independently within every microservice, services can retrieve their configuration from the Config Server.
-
-This provides:
-
-* Centralized configuration management.
-* Consistent configuration across services.
-* Easier configuration updates.
-* Reduced duplication of configuration files.
-* Simplified deployment and environment management.
-
-The Config Server is also deployed with a configured load balancer so that multiple instances can serve configuration requests when required.
-
----
-
-### Service Registry
-
-The **Service Registry** is responsible for service discovery within the platform.
-
-Microservices register themselves with the Service Registry, allowing other services and platform components to discover available service instances dynamically.
-
-The registry maintains information such as:
-
-* Registered microservices.
-* Available service instances.
-* Network locations of service instances.
-* Service availability within the platform network.
-
-The platform is deployed using an **instance group**, allowing multiple instances of platform services to operate within the network. Service Registry instances can therefore communicate with each other and maintain service registration information across the platform.
-
-This allows microservices to discover services dynamically rather than relying on hard-coded hostnames or IP addresses.
-
----
-
-## Deployment Architecture
-
-The platform is designed to simplify deployment of the Capstone Project to a cloud virtual machine environment.
-
-Instead of separately cloning and managing every platform repository, the parent repository contains references to the required platform components through Git submodules.
-
-A deployment can therefore follow this general process:
-
-
-
-
-This structure makes it easier to clone the complete platform onto a cloud virtual machine while keeping each component independently versioned and maintained.
-
----
-
-## Load Balancing
-
-Load balancers are configured for the **API Gateway** and **Config Server** components.
-
-This allows requests to be distributed across multiple running instances.
-
-The general architecture is:
-
-
-
-Load balancing improves the scalability and availability of the platform components by preventing all requests from being handled by a single instance.
-
----
-
-## Service-to-Service Communication
-
-The microservices use the platform components for configuration and service discovery.
-
-A simplified flow is:
-
-
-When a microservice starts:
-
-1. It retrieves its configuration from the **Config Server**.
-2. It registers itself with the **Service Registry**.
-3. Other services can discover its available instances through the registry.
-4. Requests can be routed through the **API Gateway**.
-5. Load balancers distribute traffic across available platform instances.
-
----
-
-## Cloning the Repository
-
-Because this repository contains Git submodules, the submodules should be initialized when cloning the repository.
-
-Use:
+### 1. Build All Infrastructure Services
+From the `platform/` root directory:
 
 ```bash
-git clone --recurse-submodules <repository-url>
+mvn clean package -DskipTests
 ```
 
-If the repository has already been cloned without initializing the submodules, run:
+This compiles and generates the target executable JAR files:
+- `config-server/target/config-server-1.0.0.jar`
+- `service-registry/target/service-registry-1.0.0.jar`
+- `api-gateway/target/api-gateway-1.0.0.jar`
+
+### 2. Manual Startup Sequence
+It is critical to start platform services in the following order:
+
+1. **Config Server** (must start first so others can pull configurations):
+   ```bash
+   cd config-server && mvn spring-boot:run
+   ```
+2. **Service Registry**:
+   ```bash
+   cd service-registry && mvn spring-boot:run
+   ```
+3. **API Gateway**:
+   ```bash
+   cd api-gateway && mvn spring-boot:run
+   ```
+
+---
+
+## ⚙ PM2 Process Management
+
+For production or single-command local orchestration, `ecosystem.config.js` is provided:
 
 ```bash
-git submodule init
-git submodule update
+# Start all platform components using PM2
+pm2 start ecosystem.config.js
+
+# Check status of platform services
+pm2 status
+
+# View live aggregate logs
+pm2 logs
 ```
-
-Alternatively, the submodules can be initialized and updated with:
-
-```bash
-git submodule update --init --recursive
-```
-
----
-
-## Updating Submodules
-
-Each platform component is maintained in its own repository.
-
-To update the submodules to their latest referenced commits:
-
-```bash
-git submodule update --remote
-```
-
-After updating a submodule, the parent repository will detect the change in the submodule reference.
-
-Commit the updated reference in the parent repository:
-
-```bash
-git add .
-git commit -m "Update platform submodules"
-git push
-```
-
----
-
-## Benefits of This Structure
-
-Using a parent repository with Git submodules provides several benefits:
-
-* **Independent development** — Each platform component has its own repository and development lifecycle.
-* **Version control** — The parent repository tracks the exact version of each component.
-* **Simplified deployment** — The complete platform can be pulled onto a cloud virtual machine from a single parent repository.
-* **Centralized platform management** — Platform components can be managed together while remaining independently maintained.
-* **Scalability** — Load balancing and instance groups allow platform services to run across multiple instances.
-* **Service discovery** — Microservices can dynamically discover one another through the Service Registry.
-* **Centralized configuration** — Microservices retrieve their configuration from the Config Server.
-
----
-
-## Technologies
-
-The platform architecture is based on technologies and infrastructure such as:
-
-* Git
-* GitHub
-* Git Submodules
-* API Gateway
-* Config Server
-* Service Registry
-* Load Balancing
-* Cloud Virtual Machines
-* Instance Groups
-* Microservices Architecture
-* PM2
-* SDK man
-* Maven
-
-
----
-
-## Related Repositories
-
-The platform consists of the following independently managed repositories:
-
-* `api-gateway`
-* `config-server`
-* `service-registry`
-
-These repositories are included in this repository as Git submodules.
-
----
-
-## Purpose
-
-The primary purpose of this repository is to provide a **single platform-level entry point** for managing and deploying the infrastructure components required by the Capstone Project.
-
-By combining independently maintained platform repositories through Git submodules, the platform can be versioned, cloned, configured, and deployed more efficiently in a cloud environment while maintaining separation between individual components.
